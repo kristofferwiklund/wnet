@@ -2,7 +2,7 @@
 #include "Wnet.h"
 #include <ESP8266WiFi.h>
 
-Wnet::Wnet(char* ssid, char* password, char* hostname = "", char* scriptname = "", char* unitname = "") {
+Wnet::Wnet(char* ssid, char* password, char* hostname, char* scriptname, char* unitname) {
   _ssid = ssid;
   _password = password;
   _hostname = hostname;
@@ -12,18 +12,25 @@ Wnet::Wnet(char* ssid, char* password, char* hostname = "", char* scriptname = "
   } else {
     _unitname = unitname;
   }
-
   _ledActive = true;
   _httpPort = 80;
   clearData();
+}
+
+void Wnet::setHostname(char* hostname) {
+  _hostname = hostname;
+}
+
+void Wnet::setScriptname(char* scriptname) {
+  _scriptname = scriptname;
 }
 
 void Wnet::setUnitname(char* unitname) {
   _unitname = unitname;
 }
 
-void Wnet::setHostname(char* hostname) {
-  _hostname = hostname;
+void Wnet::setPort(int port) {
+  _httpPort = port;
 }
 
 void Wnet::setup()
@@ -60,17 +67,18 @@ void Wnet::addData(String key, String value) {
   _data = _data + "&" + key + "="+ value;
 }
 
-void Wnet::sendData(char* cmd) {
+void Wnet::sendData(char* cmd = "") {
   long rssi = WiFi.RSSI();
   addData("rssi",String(rssi));
   unsigned long uptime = millis();
   addData("uptime",String(uptime));
   addData("cmd",cmd);
 
-  Serial.print("http://");
+  Serial.print("Connection to: http://");
   Serial.print(_hostname);
   Serial.print("/");
   Serial.println(_scriptname);
+  Serial.print("Sending data: ");
   Serial.println(_data);
   while(!_client.connect(_hostname, _httpPort)) {
     Serial.println("Connection failed!");
@@ -84,12 +92,13 @@ void Wnet::sendData(char* cmd) {
   _client.println(_hostname);
   _client.println("User-Agent: Arduino/1.0 Wnet/1.0");
   _client.println("Connection: close");
-  _client.println("Content-Type: application/x-www-form-urlencoded;");
+  _client.println("Content-Type: application/x-www-form-urlencoded");
   _client.print("Content-Length: ");
   _client.println(_data.length());
   _client.println();
   _client.println(_data);
   delay(10);
+  Serial.println("Response: ");
   while(_client.available()){
     String line = _client.readStringUntil('\r');
     Serial.print(line);
@@ -97,7 +106,7 @@ void Wnet::sendData(char* cmd) {
   
   Serial.println();
   _client.stop();
-  Serial.println("closing connection");
+  Serial.println("Closing connection.");
 }
 
 
