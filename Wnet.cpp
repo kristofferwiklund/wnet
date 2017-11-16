@@ -78,13 +78,14 @@ void Wnet::sendData(char* cmd = "") {
   Serial.print(_hostname);
   Serial.print("/");
   Serial.println(_scriptname);
-  Serial.print("Sending data: ");
-  Serial.println(_data);
+  
   while(!_client.connect(_hostname, _httpPort)) {
     Serial.println("Connection failed!");
     delay(100);
   } 
-
+  Serial.print("Sending data: ");
+  Serial.println(_data);
+  
   _client.print("POST /");
   _client.print(_scriptname);
   _client.println(" HTTP/1.1");
@@ -97,7 +98,7 @@ void Wnet::sendData(char* cmd = "") {
   _client.println(_data.length());
   _client.println();
   _client.println(_data);
-  delay(10);
+  delay(100);
   Serial.println("Response: ");
   while(_client.available()){
     String line = _client.readStringUntil('\r');
