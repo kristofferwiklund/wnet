@@ -33,11 +33,11 @@ void Wnet::setPort(int port) {
   _httpPort = port;
 }
 
-void Wnet::setup()
+void Wnet::setup(int baud=74880)
 {
   pinMode(BUILTIN_LED, OUTPUT);
   digitalWrite(BUILTIN_LED, LOW);
-  Serial.begin(74880);
+  Serial.begin(baud);
   Serial.print(_unitname);
   Serial.println(" started");
   Serial.println("* * * * * * *");
